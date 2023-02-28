@@ -61,7 +61,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./fastapiapp    # path to dockerfile
-          file: Dockerfile
+          # file: Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/fast_api_app:latest
