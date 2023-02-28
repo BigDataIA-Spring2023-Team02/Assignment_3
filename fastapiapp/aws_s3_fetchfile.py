@@ -4,7 +4,11 @@ import boto3
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import APIRouter, status, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, status, HTTPException, Depends
+from jwt_api import get_current_user
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 #set path for env variables
 dotenv_path = Path('./.env')
@@ -20,7 +24,12 @@ router = APIRouter(
 
 # Decorator for the HTTP POST method for the /goes18 endpoint
 @router.post('/goes18', status_code=status.HTTP_200_OK)
-async def generate_goes_url(file_name : str):
+async def generate_goes_url(file_name : str, token: str = Depends(oauth2_scheme)):
+    user_id = get_current_user(token)
+    
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
     # create a boto3 client object for logging
     clientLogs = boto3.client('logs',
                         region_name='us-east-1',
@@ -74,7 +83,12 @@ async def generate_goes_url(file_name : str):
 
 # Decorator for the HTTP POST method for the /nexrad endpoint
 @router.post('/nexrad', status_code=status.HTTP_200_OK)
-async def generate_nexrad_url(file_name : str):
+async def generate_nexrad_url(file_name : str, token: str = Depends(oauth2_scheme)):
+    user_id = get_current_user(token)
+    
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
     # create a boto3 client object for logging
     clientLogs = boto3.client('logs',
                         region_name='us-east-1',
