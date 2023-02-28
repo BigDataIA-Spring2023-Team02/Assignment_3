@@ -1,6 +1,6 @@
 import schemas
 from typing import Optional
-import jwt
+from jose import jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
@@ -14,12 +14,21 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated= "auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "login")
 
 def bcrypt(password: str):
+    """
+    Generate a hash of the given password.
+    """
     return  pwd_context.hash(password)
 
 def verify(hashed_password, plain_password):
+    """
+    Verify a password against a hashed password.
+    """
     return pwd_context.verify(plain_password,hashed_password)
 
 def create_access_token(data: dict):
+    """
+    Create a JWT token and return the access token to user.
+    """
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
@@ -27,13 +36,20 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 def verify_token(token:str, credentials_exception):
+    """
+    Decode a JWT token and return its payload.
+    """
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     username: str = payload.get("sub")
     if username is None:
         raise credentials_exception
     token_data = schemas.TokenData(username=username)
+    return token_data
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
+    """
+    Get a current user from the token passed by the user to verify the token.
+    """
     credentials_exception = HTTPException(
         status_code= status.HTTP_401_UNAUTHORIZED,
         detail = "Could not validate credentials",

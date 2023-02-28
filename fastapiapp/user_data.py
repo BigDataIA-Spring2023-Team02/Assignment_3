@@ -13,7 +13,7 @@ engine = create_engine(user_db_url, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
 
-def get_db():
+def get_user_data():
     db = SessionLocal()
     try:
         yield db

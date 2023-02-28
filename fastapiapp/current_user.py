@@ -10,20 +10,23 @@ router = APIRouter(
 )
 
 # Getting the database object using dependency injection
-get_db = user_data.get_db
+get_user_db = user_data.get_user_data
 
 # Creating a POST route to create a new user
 @router.post('/user/create', response_model= schemas.ShowUser)
-def create_user(request: schemas.User, db: Session = Depends(get_db)):
+def create_user(request: schemas.User, database: Session = Depends(get_user_db)):
+    """
+    Create a new user and add it into user database to login to the system
+    """
     # Creating a new user object with hashed password
-    new_user = user_db_model.User_Table(full_name = request.full_name, username = request.username, password = bcrypt(request.password))
+    user = user_db_model.User_Table(full_name = request.full_name, username = request.username, password = bcrypt(request.password))
     
     # Adding the new user to the database
-    db.add(new_user)
-    db.commit()
+    database.add(user)
+    database.commit()
 
     # Refreshing the new user object to update its fields
-    db.refresh(new_user)
+    database.refresh(user)
 
     # Returning the newly created user object
-    return new_user
+    return user

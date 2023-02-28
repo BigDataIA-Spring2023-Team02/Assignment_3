@@ -13,7 +13,10 @@ router = APIRouter(
 
 # Create route for user login
 @router.post('/login')
-def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(user_data.get_db)):
+def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(user_data.get_user_data)):
+    """
+    Login to the system and generate access token to get full access of the application
+    """
     # Query database for user based on provided username
     user = db.query(user_db_model.User_Table).filter(user_db_model.User_Table.username == request.username).first()
     
