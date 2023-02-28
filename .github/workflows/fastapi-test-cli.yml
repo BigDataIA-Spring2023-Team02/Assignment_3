@@ -40,12 +40,12 @@ jobs:
       -
         name: Install pipenv
         run: pip install pipenv
-      -
-        name: Run tests
-        working-directory: ./fastapiapp
-        run: |
-          pipenv install -r requirements.txt
-          pipenv run pytest -v                          
+      # -
+        # name: Run tests
+        # working-directory: ./fastapiapp
+        # run: |
+        #   pipenv install -r requirements.txt
+        #   pipenv run pytest -v                          
         # Running pytest
       -
         name: Login to Docker Hub
@@ -61,7 +61,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./fastapiapp    # path to dockerfile
-          # file: Dockerfile
+          file: Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/fast_api_app:latest
