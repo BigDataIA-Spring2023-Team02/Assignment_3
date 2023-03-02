@@ -24,7 +24,7 @@ router = APIRouter(
 
 # Decorator for the HTTP POST method for the /goes18 endpoint
 @router.post('/goes18', status_code=status.HTTP_200_OK)
-async def generate_goes_url(file_name : str, token: str = Depends(oauth2_scheme)):
+async def generate_goes_url(file_input : str, token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
     
     if not user_id:
@@ -41,7 +41,7 @@ async def generate_goes_url(file_name : str, token: str = Depends(oauth2_scheme)
     input_url = "https://noaa-goes18.s3.amazonaws.com/"
     
     # clean up the file name by removing any whitespaces
-    file_name = file_name.strip()
+    file_name = file_input.strip()
     
     # match the file name with the required pattern using regular expression
     if (re.match(r'[O][R][_][A-Z]{3}[-][A-Za-z0-9]{2,3}[-][A-Za-z0-9]{4,6}[-][A-Z0-9]{2,5}[_][G][1][8][_][s][0-9]{14}[_][e][0-9]{14}[_][c][0-9]{14}\b', file_name)):
@@ -63,7 +63,7 @@ async def generate_goes_url(file_name : str, token: str = Depends(oauth2_scheme)
         hour = file_name[3][8:10]
         
         # Constructing the final url by concatenating all the extracted elements in the required format
-        final_url = input_url + file_split[0] + '-' + file_split[1] + '-' + str_2 + '/' + year + '/' + day + '/' + hour + '/' + file_name
+        final_url = input_url + file_split[0] + '-' + file_split[1] + '-' + str_2 + '/' + year + '/' + day + '/' + hour + '/' + file_input
         
         # check if the URL is valid by making a GET request
         response = requests.get(final_url)
@@ -83,7 +83,7 @@ async def generate_goes_url(file_name : str, token: str = Depends(oauth2_scheme)
 
 # Decorator for the HTTP POST method for the /nexrad endpoint
 @router.post('/nexrad', status_code=status.HTTP_200_OK)
-async def generate_nexrad_url(file_name : str, token: str = Depends(oauth2_scheme)):
+async def generate_nexrad_url(file_input : str, token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
     
     if not user_id:
@@ -100,12 +100,12 @@ async def generate_nexrad_url(file_name : str, token: str = Depends(oauth2_schem
     input_url = "https://noaa-nexrad-level2.s3.amazonaws.com/"
     
     # clean up the file name by removing any whitespaces
-    file_name = file_name.strip()
+    file_name = file_input.strip()
     
     # match the file name with the required pattern using regular expression
     if (re.match(r'[A-Z]{3}[A-Z0-9][0-9]{8}[_][0-9]{6}[_]{0,1}[A-Z]{0,1}[0-9]{0,2}[_]{0,1}[A-Z]{0,3}\b', file_name)):
         # Construct the final URL to the file
-        final_url = input_url+file_name[4:8]+"/"+file_name[8:10]+"/"+file_name[10:12]+"/"+file_name[:4]+"/"+file_name
+        final_url = input_url+file_name[4:8]+"/"+file_name[8:10]+"/"+file_name[10:12]+"/"+file_name[:4]+"/"+file_input
         
         # Send an HTTP GET request to the constructed URL to check if the file exists
         response = requests.get(final_url)
