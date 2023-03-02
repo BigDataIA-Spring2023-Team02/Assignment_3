@@ -135,11 +135,16 @@ airflow/logs
 airflow/plugins
 airflow/working_data
 
-# great_expectations
-great_expectations/checkpoints
-great_expectations/data
-great_expectations/plugins
+data_as_service/airflow/logs
+data_as_service/airflow/plugins
+data_as_service/airflow/working_dir/data
+data_as_service/db_data
 
-great_expectations/expectations/.ge_store_backend_id
-great_expectations/uncommitted/config_variables.yml
-great_expectations/uncommitted/validations
+# great_expectations
+data_as_service/airflow/working_dir/great_expectations/checkpoints
+data_as_service/airflow/working_dir/great_expectations/data
+data_as_service/airflow/working_dir/great_expectations/plugins
+
+data_as_service/airflow/working_dir/great_expectations/expectations/.ge_store_backend_id
+data_as_service/airflow/working_dir/great_expectations/uncommitted/config_variables.yml
+data_as_service/airflow/working_dir/great_expectations/uncommitted/validations
