@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "typerpackage"
+version = "0.1.0"
+description = "This is for calling Fast API services through CLI commands for our data exploration project"
+authors = ["Meet Doshi <doshi.mee@northeastern.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+typer = "^0.7.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+typerpackage = "typerpackage.app"
