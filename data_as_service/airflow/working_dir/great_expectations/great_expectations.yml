@@ -18,51 +18,53 @@ datasources:
     execution_engine:
       module_name: great_expectations.execution_engine
       class_name: PandasExecutionEngine
-    module_name: great_expectations.datasource
     data_connectors:
       default_inferred_data_connector_name:
-        name: default_inferred_data_connector_name
-        module_name: great_expectations.datasource.data_connector
-        base_directory: ../data
         default_regex:
           group_names:
             - data_asset_name
           pattern: (.*)
+        module_name: great_expectations.datasource.data_connector
+        base_directory: ../data
+        name: default_inferred_data_connector_name
         class_name: InferredAssetFilesystemDataConnector
       default_runtime_data_connector_name:
-        name: default_runtime_data_connector_name
-        module_name: great_expectations.datasource.data_connector
         assets:
           my_runtime_asset_name:
-            module_name: great_expectations.datasource.data_connector.asset
             batch_identifiers:
               - runtime_batch_identifier_name
+            module_name: great_expectations.datasource.data_connector.asset
             class_name: Asset
+        module_name: great_expectations.datasource.data_connector
+        name: default_runtime_data_connector_name
         class_name: RuntimeDataConnector
+    module_name: great_expectations.datasource
     class_name: Datasource
   noaa_nexrad_datasource:
     execution_engine:
       module_name: great_expectations.execution_engine
       class_name: PandasExecutionEngine
-    module_name: great_expectations.datasource
     data_connectors:
       default_inferred_data_connector_name:
-        module_name: great_expectations.datasource.data_connector
-        base_directory: ../data
         default_regex:
           group_names:
             - data_asset_name
           pattern: (.*)
+        module_name: great_expectations.datasource.data_connector
+        base_directory: ../data
+        name: default_inferred_data_connector_name
         class_name: InferredAssetFilesystemDataConnector
       default_runtime_data_connector_name:
-        module_name: great_expectations.datasource.data_connector
         assets:
           my_runtime_asset_name:
-            module_name: great_expectations.datasource.data_connector.asset
             batch_identifiers:
               - runtime_batch_identifier_name
+            module_name: great_expectations.datasource.data_connector.asset
             class_name: Asset
+        module_name: great_expectations.datasource.data_connector
+        name: default_runtime_data_connector_name
         class_name: RuntimeDataConnector
+    module_name: great_expectations.datasource
     class_name: Datasource
 config_variables_file_path: uncommitted/config_variables.yml
 
@@ -126,10 +128,10 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  enabled: true
   data_context_id: e8dfd921-29ca-4ec8-9bcb-90dfa291f849
+  enabled: true
 include_rendered_content:
-  expectation_suite: false
-  globally: false
   expectation_validation_result: false
+  globally: false
+  expectation_suite: false
 notebooks:
