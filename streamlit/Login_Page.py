@@ -25,6 +25,7 @@ if 'logged_in' not in st.session_state:
     st.session_state['access_token'] = ''
     st.session_state['username'] = ''
     st.session_state['password'] = ''
+    st.session_state['plan'] = ''
 
 if st.session_state['logged_in'] == False:
     st.title("Login Page !!!")
@@ -32,20 +33,33 @@ if st.session_state['logged_in'] == False:
     
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
+    plan = st.radio(
+    "Which Plan you are subscribed to:",
+    ('Free', 'Gold', 'Platinum'))
     login_button = st.button('Log In !!!')
+    reset_button = st.button('Forgot Password !!!')
+
+    
 
     with st.sidebar:
         if st.session_state and st.session_state.logged_in and st.session_state.username:
             st.write(f'Current User: {st.session_state.username}')
         else:
             st.write('Current User: Not Logged In')
+    
+    
+
+    if reset_button:
+        with st.spinner("Loading..."):
+            switch_page('Reset')
+
 
     if login_button:
-        if username == '' or password == '':
-            st.warning("Please enter username and password")
+        if username == '' or password == '' or plan == '':
+            st.warning("Please enter username, password and plan")
         else:
             with st.spinner("Wait.."):
-                payload = {'username': username, 'password': password}
+                payload = {'username': username, 'password': password, 'plan':plan}
                 try:
                     response = requests.post(f"{BASE_URL}/login", data=payload)
                 except:
