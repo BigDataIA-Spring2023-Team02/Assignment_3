@@ -16,7 +16,7 @@ if 'logged_in' not in st.session_state:
     st.session_state['access_token'] = ''
     st.session_state['username'] = ''
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 clientLogs = boto3.client('logs',
                         region_name='us-east-1',

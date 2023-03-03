@@ -11,7 +11,7 @@ from streamlit_extras.switch_page_button import switch_page
 #load env variables
 load_dotenv()
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 #authenticate S3 client for logging with your user credentials that are stored in your .env config file
 clientLogs = boto3.client('logs',

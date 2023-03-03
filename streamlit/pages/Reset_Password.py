@@ -8,7 +8,7 @@ from requests.exceptions import HTTPError
 from fastapi.security import OAuth2PasswordBearer
 from streamlit_extras.switch_page_button import switch_page
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 st.title("Reset Password Page !!!")
 

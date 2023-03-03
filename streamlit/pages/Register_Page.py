@@ -3,7 +3,7 @@ import requests
 import json
 from streamlit_extras.switch_page_button import switch_page
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
