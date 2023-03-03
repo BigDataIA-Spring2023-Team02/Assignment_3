@@ -14,8 +14,9 @@ from airflow.utils.dates import days_ago
 from airflow.models import Variable
 from airflow.models.param import Param
 from airflow.operators.python_operator import PythonOperator
+# from great_expectations_provider.operators.great_expectations import GreatExpectationsOperator
 
-base_path = "/opt/airflow/working_dir"
+base_path = "/opt/working_dir"
 # data_dir = os.path.join(base_path, "News-Aggregator", "great_expectations", "data")
 ge_root_dir = os.path.join(base_path, "great_expectations")
 
@@ -289,9 +290,25 @@ def scrape_nexradmap_metadata():
     write_logs(f"Successfully Scraped NexradMap Metadata and stored to Database file.")
 
 def upload_db_s3():
-    file_path = './dags/airflow_scrape_data.db'
-    with open(file_path, "rb") as f:
-        s3client.upload_fileobj(f, 'damg-7245-projects/data-store', 'airflow_scrape_data.db')
+    s3res = boto3.resource('s3', region_name='us-east-1',
+                        aws_access_key_id = os.environ.get('AWS_ACCESS_KEY'),
+                        aws_secret_access_key = os.environ.get('AWS_SECRET_KEY'))
+    s3res.Bucket(os.environ.get('USER_BUCKET_NAME')).upload_file("./dags/airflow_scrape_data.db", "data-store/airflow_scrape_data.db")
+    
+    database_file_name = 'airflow_scrape_data.db'
+    database_file_path = os.path.join(os.path.dirname(__file__),database_file_name)
+    conn = sqlite3.connect(database_file_path, isolation_level=None, detect_types=sqlite3.PARSE_COLNAMES)
+    goes_df = pd.read_sql_query("SELECT * FROM GEOS18", conn)
+    nexrad_df = pd.read_sql_query("SELECT * FROM NEXRAD", conn)
+    nexradmap_df = pd.read_sql_query("SELECT * FROM NexradMap", conn)
+
+    goes_df.to_csv(f"./working_dir/data/noaa_geos18.csv", sep=',', index=False)
+    nexrad_df.to_csv(f"./working_dir/data/noaa_nexrad.csv", sep=',', index=False)
+    nexradmap_df.to_csv(f"./working_dir/data/noaa_nexradmap.csv", sep=',', index=False)
+
+    s3client.put_object(Body=goes_df.to_csv(index=False), Bucket=os.environ.get('USER_BUCKET_NAME'), Key='data-store/goes18_data.csv')
+    s3client.put_object(Body=nexrad_df.to_csv(index=False), Bucket=os.environ.get('USER_BUCKET_NAME'), Key='data-store/nexrad_data.csv')
+    s3client.put_object(Body=nexradmap_df.to_csv(index=False), Bucket=os.environ.get('USER_BUCKET_NAME'), Key='data-store/nexradmap_data.csv')
 
 with dag:
 
