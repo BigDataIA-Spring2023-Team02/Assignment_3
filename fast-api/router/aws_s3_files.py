@@ -53,7 +53,7 @@ async def list_files_in_goes18_bucket(year : str, day : str, hour : str, product
     file_list = []
     prefix = product+'/'+year+'/'+day+'/'+hour+'/'
     geos_bucket = s3client.list_objects(Bucket = geos_bucket_name, Prefix = prefix).get('Contents')
-    write_logs("API endpoint: /aws-s3-files/goes18\n Called by: " + get_current_user(token) + " \n Response: 200 \nPrinting files from GOES18 S3 bucket")
+    write_logs("API endpoint: /aws-s3-files/goes18\n Called by: " + get_current_user(token).username + " \n Response: 200 \nPrinting files from GOES18 S3 bucket")
     for objects in geos_bucket:
         file_path = objects['Key']
         file_path = file_path.split('/')
@@ -61,7 +61,7 @@ async def list_files_in_goes18_bucket(year : str, day : str, hour : str, product
     if (len(file_list)!=0):
         return file_list
     else:
-        write_logs( "API endpoint: /aws-s3-files/goes18\n Called by: " + get_current_user(token) + " \n Response: 404 \nUnable to fetch filenames from S3 bucket")
+        write_logs( "API endpoint: /aws-s3-files/goes18\n Called by: " + get_current_user(token).username + " \n Response: 404 \nUnable to fetch filenames from S3 bucket")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail= "Unable to fetch filenames from S3 bucket")
 
@@ -84,7 +84,7 @@ async def list_files_in_nexrad_bucket(year : str, month : str, day : str, nexrad
     file_list = []
     prefix = year+'/'+month+'/'+day+'/'+nexrad_station+'/'
     nexrad_bucket = s3client.list_objects(Bucket = nexrad_bucket_name, Prefix = prefix).get('Contents')
-    write_logs("API endpoint: /aws-s3-files/nexrad\n Called by: " + get_current_user(token) + " \n Response: 200 \nPrinting files from NEXRAD S3 bucket")
+    write_logs("API endpoint: /aws-s3-files/nexrad\n Called by: " + get_current_user(token).username + " \n Response: 200 \nPrinting files from NEXRAD S3 bucket")
     for objects in nexrad_bucket:
         file_path = objects['Key']
         file_path = file_path.split('/')
@@ -92,7 +92,7 @@ async def list_files_in_nexrad_bucket(year : str, month : str, day : str, nexrad
     if (len(file_list)!=0):
         return file_list
     else:
-        write_logs( "API endpoint: /aws-s3-files/nexrad\n Called by: " + get_current_user(token) + " \n Response: 404 \nUnable to fetch filenames from S3 bucket")
+        write_logs( "API endpoint: /aws-s3-files/nexrad\n Called by: " + get_current_user(token).username + " \n Response: 404 \nUnable to fetch filenames from S3 bucket")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail= "Unable to fetch filenames from S3 bucket")
 
@@ -124,13 +124,13 @@ async def copy_goes_file_to_user_bucket(file_name : str, product : str, year : s
             }
         for file in destination_bucket.objects.all():
             if(file.key == destination_key):
-                write_logs("API endpoint: /aws-s3-files/goes18/copyfile\n Called by: " + get_current_user(token) + " \n Response: 200 \nSuccessfully found URL for given file name for GOES \nFilename requested for download: " + file_name)
+                write_logs("API endpoint: /aws-s3-files/goes18/copyfile\n Called by: " + get_current_user(token).username + " \n Response: 200 \nSuccessfully found URL for given file name for GOES \nFilename requested for download: " + file_name)
                 return url_to_mys3
         destination_bucket.copy(copy_source, destination_key)
-        write_logs("API endpoint: /aws-s3-files/goes18/copyfile\n Called by: " + get_current_user(token) + " \n Response: 200 \nDisplaying download link for copied file "+ file_name + " with selections " + all_selections_string)
+        write_logs("API endpoint: /aws-s3-files/goes18/copyfile\n Called by: " + get_current_user(token).username + " \n Response: 200 \nDisplaying download link for copied file "+ file_name + " with selections " + all_selections_string)
         return url_to_mys3
     except:
-        write_logs("API endpoint: /aws-s3-files/goes18/copyfile\n Called by: " + get_current_user(token) + " \n Response: 404 \nUnable to copy file")
+        write_logs("API endpoint: /aws-s3-files/goes18/copyfile\n Called by: " + get_current_user(token).username + " \n Response: 404 \nUnable to copy file")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail= "Unable to copy file")
 
@@ -162,12 +162,12 @@ def copy_nexrad_file_to_user_bucket(file_name : str, year : str, month : str, da
             }
         for file in destination_bucket.objects.all():
             if(file.key == destination_key):    #if selected file already exists at destination bucket
-                write_logs("API endpoint: /aws-s3-files/nexrad/copyfile\n Called by: " + get_current_user(token) + " \n Response: 200 \nSuccessfully found URL for given file name for NEXRAD \nFilename requested for download: " + file_name)
+                write_logs("API endpoint: /aws-s3-files/nexrad/copyfile\n Called by: " + get_current_user(token).username + " \n Response: 200 \nSuccessfully found URL for given file name for NEXRAD \nFilename requested for download: " + file_name)
                 return url_to_mys3
         destination_bucket.copy(copy_source, destination_key)   #copy file to destination bucket
-        write_logs("API endpoint: /aws-s3-files/nexrad/copyfile\n Called by: " + get_current_user(token) + " \n Response: 200 \nDisplaying download link for copied file "+ file_name + " with selections " + all_selections_string)
+        write_logs("API endpoint: /aws-s3-files/nexrad/copyfile\n Called by: " + get_current_user(token).username + " \n Response: 200 \nDisplaying download link for copied file "+ file_name + " with selections " + all_selections_string)
         return url_to_mys3
     except:
-        write_logs("API endpoint: /aws-s3-files/nexrad/copyfile\n Called by: " + get_current_user(token) + " \n Response: 404 \nUnable to copy file")
+        write_logs("API endpoint: /aws-s3-files/nexrad/copyfile\n Called by: " + get_current_user(token).username + " \n Response: 404 \nUnable to copy file")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail= "Unable to copy file")
