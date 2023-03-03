@@ -23,11 +23,10 @@ elif new_password != confirm_password:
     st.warning("New password and confirm password must match")
 else:
     with st.spinner("Wait.."):
-        payload = {'username': user, 'new_password': new_password, 'confirm_password': confirm_password}
+        payload = {'new_password': new_password}
         headers = {'Authorization': f'Bearer {st.session_state["access_token"]}'}
         try:
-            response = requests.post(f"{BASE_URL}/reset", json=payload, headers=headers)
-            print("UI: Response", response)
+            response = requests.patch(f"{BASE_URL}/user/update?username={user}", json=payload)
         except:
             st.error("Service is unavailable at the moment !!")
             st.error("Please try again later")

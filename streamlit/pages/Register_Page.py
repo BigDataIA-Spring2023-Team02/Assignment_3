@@ -14,8 +14,6 @@ if 'logged_in' not in st.session_state:
     st.session_state['full_name'] = ''
     st.session_state['username'] = ''
     st.session_state['password'] = ''
-    st.session_state['plan']=''
-    st.session_state['role']=''
 
 if st.session_state['logged_in'] == False:
     st.write("Create a new user account to get started !!!")
@@ -24,15 +22,17 @@ if st.session_state['logged_in'] == False:
     username = st.text_input("Username", placeholder='Username')
     password = st.text_input("Password", placeholder='Password', type = 'password')
     confirm_password = st.text_input("Confirm Password", type="password")
-    plan = st.radio("Which Plan you want to subscribed too:", ('Free', 'Gold', 'Platinum'))
-    role = st.radio("Please select the role:",('admin','user'))
-    login_button = st.button('Log In !!!')
+    plans = [{'name': 'Free','details': '10 API requests hourly'},
+            {'name': 'Gold','details': '15 API requests hourly'},
+            {'name': 'Platinum','details': 'Unlimited API requests hourly'}]
+    user = st.selectbox("Please choose User Type:",['User', 'Admin'])
+    selected_plan = st.selectbox('Select a plan', [f"{plan['name']} - {plan['details']}" for plan in plans])
     register_submit = st.button('Register')
 
     if register_submit:
         if len(password) < 6:
             st.warning("Password should be minimum 6 characters long")
-        elif full_name == '' or username == '' or password == '' or confirm_password == '' or plan == '' or role == '':
+        elif full_name == '' or username == '' or password == '' or confirm_password == '':
             st.warning("Please fill all fields.")
         elif password != confirm_password:
             with st.spinner("Wait ..."):
@@ -43,21 +43,19 @@ if st.session_state['logged_in'] == False:
                     st.session_state.full_name = full_name
                     st.session_state.username = username
                     st.session_state.password = password
-                    st.session_state.plan = plan
-                    st.session_state.role = role
                     register_user = {
                         'full_name': st.session_state.full_name,
                         'username': st.session_state.username,
                         'password': st.session_state.password,
-                        'plan': st.session_state.plan,
-                        'role':st.session_state.role
+                        'plan': selected_plan[0],
+                        'user_type': user
                     }
                     response = requests.post(url=f'{BASE_URL}/user/create', json=register_user) 
                 except:
                     st.error("Service is unavailable at the moment !!")
                     st.error("Please try again later")
                     st.stop()
-                print(response.status_code)
+                
                 if response and response.status_code == 200:
                     st.success("Account created successfully !!")
                     st.session_state.access_token = response.json().get('access_token')
