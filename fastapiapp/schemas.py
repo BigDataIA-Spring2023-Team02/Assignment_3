@@ -7,6 +7,7 @@ class User(BaseModel):
     username : str
     password: str
     plan : str
+    role: str
 
 class ShowUser(BaseModel):
     username: str

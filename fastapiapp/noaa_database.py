@@ -15,7 +15,6 @@ router = APIRouter(
 @router.get('/goes18', status_code=status.HTTP_200_OK)
 async def get_product_goes(db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -31,7 +30,6 @@ async def get_product_goes(db_conn : Connection = Depends(get_database_file), to
 @router.get('/goes18/prod', status_code=status.HTTP_200_OK)
 async def get_years_in_product_goes(product : str = 'ABI-L1b-RadC', db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -47,7 +45,6 @@ async def get_years_in_product_goes(product : str = 'ABI-L1b-RadC', db_conn : Co
 @router.get('/goes18/prod/year', status_code=status.HTTP_200_OK)
 async def get_days_in_year_goes(year : str, product : str = 'ABI-L1b-RadC', db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -63,7 +60,6 @@ async def get_days_in_year_goes(year : str, product : str = 'ABI-L1b-RadC', db_c
 @router.get('/goes18/prod/year/day', status_code=status.HTTP_200_OK)
 async def get_hours_in_day_goes(day : str, year : str, product : str = 'ABI-L1b-RadC', db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -79,7 +75,6 @@ async def get_hours_in_day_goes(day : str, year : str, product : str = 'ABI-L1b-
 @router.get('/nexrad', status_code=status.HTTP_200_OK)
 async def get_years_nexrad(db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -95,7 +90,6 @@ async def get_years_nexrad(db_conn : Connection = Depends(get_database_file), to
 @router.get('/nexrad/year', status_code=status.HTTP_200_OK)
 async def get_months_in_year_nexrad(year : str, db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -111,7 +105,6 @@ async def get_months_in_year_nexrad(year : str, db_conn : Connection = Depends(g
 @router.get('/nexrad/year/month', status_code=status.HTTP_200_OK)
 async def get_days_in_month_nexrad(month : str, year: str, db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -127,7 +120,6 @@ async def get_days_in_month_nexrad(month : str, year: str, db_conn : Connection 
 @router.get('/nexrad/year/month/day', status_code=status.HTTP_200_OK)
 async def get_stations_for_day_nexrad(day : str, month : str, year : str, db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -143,7 +135,6 @@ async def get_stations_for_day_nexrad(day : str, month : str, year : str, db_con
 @router.get('/mapdata', status_code=status.HTTP_200_OK)
 async def get_nexrad_mapdata(db_conn : Connection = Depends(get_database_file), token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     

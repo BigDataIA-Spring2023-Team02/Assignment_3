@@ -19,7 +19,9 @@ def create_user(request: schemas.User, database: Session = Depends(get_user_db))
     Create a new user and add it into user database to login to the system
     """
     # Creating a new user object with hashed password
-    user = user_db_model.User_Table(full_name = request.full_name, username = request.username, password = bcrypt(request.password), plan = request.plan)
+    if user.username in schemas.User:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    user = user_db_model.User_Table(full_name = request.full_name, username = request.username, password = bcrypt(request.password), plan = request.plan, role = request.role)
     
     # Adding the new user to the database
     database.add(user)

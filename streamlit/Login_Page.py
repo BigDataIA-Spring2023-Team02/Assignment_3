@@ -1,5 +1,5 @@
-import json
 import os
+import json
 import boto3
 import requests
 import streamlit as st
@@ -33,26 +33,19 @@ if st.session_state['logged_in'] == False:
     
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
-    plan = st.radio(
-    "Which Plan you are subscribed to:",
-    ('Free', 'Gold', 'Platinum'))
+    plan = st.radio("Which Plan you are subscribed to:", ('Free', 'Gold', 'Platinum'))
     login_button = st.button('Log In !!!')
     reset_button = st.button('Forgot Password !!!')
-
-    
 
     with st.sidebar:
         if st.session_state and st.session_state.logged_in and st.session_state.username:
             st.write(f'Current User: {st.session_state.username}')
         else:
             st.write('Current User: Not Logged In')
-    
-    
 
     if reset_button:
         with st.spinner("Loading..."):
-            switch_page('Reset')
-
+            switch_page('Reset_Password')
 
     if login_button:
         if username == '' or password == '' or plan == '':

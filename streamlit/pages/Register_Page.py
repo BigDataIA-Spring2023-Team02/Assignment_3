@@ -23,9 +23,8 @@ if st.session_state['logged_in'] == False:
     username = st.text_input("Username", placeholder='Username')
     password = st.text_input("Password", placeholder='Password', type = 'password')
     confirm_password = st.text_input("Confirm Password", type="password")
-    plan = st.radio(
-    "Which Plan you want to subscribed too:",
-    ('Free', 'Gold', 'Platinum'))
+    plan = st.radio("Which Plan you want to subscribed too:", ('Free', 'Gold', 'Platinum'))
+    role = st.radio("Please select the role:",('admin','user'))
     login_button = st.button('Log In !!!')
     register_submit = st.button('Register')
 
@@ -55,7 +54,7 @@ if st.session_state['logged_in'] == False:
                     st.error("Service is unavailable at the moment !!")
                     st.error("Please try again later")
                     st.stop()
-                
+                print(response.status_code)
                 if response and response.status_code == 200:
                     st.success("Account created successfully !!")
                     st.session_state.access_token = response.json().get('access_token')

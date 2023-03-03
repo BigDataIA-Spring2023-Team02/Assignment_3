@@ -129,6 +129,8 @@ dmypy.json
 
 # User defined
 assgn3_venv
+data_as_service/das_venv
+data_as_service/db_data
 
 # airflow
 airflow/logs
@@ -137,8 +139,7 @@ airflow/working_data
 
 data_as_service/airflow/logs
 data_as_service/airflow/plugins
-data_as_service/airflow/working_dir/data
-data_as_service/db_data
+data_as_service/airflow/working_data
 
 # great_expectations
 data_as_service/airflow/working_dir/great_expectations/checkpoints

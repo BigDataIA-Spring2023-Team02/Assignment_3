@@ -1,15 +1,23 @@
 import os
+import re
 import time
 import boto3
 import sqlite3
+import requests
 import pandas as pd
-from airflow import DAG
 from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
-from airflow.operators.python_operator import PythonOperator
+from airflow.models import DAG
+from botocore import UNSIGNED
+from botocore.config import Config
 from airflow.utils.dates import days_ago
+from airflow.models import Variable
 from airflow.models.param import Param
+from airflow.operators.python_operator import PythonOperator
+
+base_path = "/opt/airflow/working_dir"
+# data_dir = os.path.join(base_path, "News-Aggregator", "great_expectations", "data")
+ge_root_dir = os.path.join(base_path, "great_expectations")
 
 # Set parameters for user input
 user_input = {
@@ -27,11 +35,10 @@ dag = DAG(
     params=user_input,
 )
 
-#set path for env variables
-dotenv_path = Path('./.env')
-
-#load env variables
-load_dotenv(dotenv_path)
+s3client = boto3.client('s3',
+                    region_name='us-east-1',
+                    config=Config(signature_version=UNSIGNED)
+                    )
 
 # Set up AWS S3 client with credentials from environment variables
 s3client = boto3.client('s3',
@@ -200,33 +207,91 @@ def scrape_nexrad_metadata():
     db.close()
     write_logs(f"Successfully Scraped NEXRAD Metadata and stored to Database file.")
 
-# Define a function to upload the database to S3 bucket
-def upload_db_s3():
-    s3res = boto3.resource('s3', region_name='us-east-1',
-                        aws_access_key_id = os.environ.get('AWS_ACCESS_KEY'),
-                        aws_secret_access_key = os.environ.get('AWS_SECRET_KEY'))
+def scrape_nexradmap_metadata():
+    nexrad_map_data_url = "https://www.ncei.noaa.gov/access/homr/file/nexrad-stations.txt"
+    nexradmap_data_dict = {'ID': [], 'Station_Code': [], 'State': [], 'County': [],'latitude': [], 'longitude': [],'elevation': []}
+    write_logs(f"Scraping NexRadMap Metadata into Database")
+
+    try:
+        response = requests.get(nexrad_map_data_url)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err_http:
+        write_logs(f"Exited due to HTTP error while accessing URL")
+        raise SystemExit(err_http)
+    except requests.exceptions.ConnectionError as err_conn:
+        write_logs(f"Exited due to Connection error while accessing URL")
+        raise SystemExit(err_conn)
+    except requests.exceptions.Timeout as err_tim:
+        write_logs(f"Exited due to Timeout error while accessing URL")
+        raise SystemExit(err_tim)
     
-    # Upload the database file to the S3 bucket
-    s3res.Bucket(os.environ.get('USER_BUCKET_NAME')).upload_file("./dags/airflow_scrape_data.db", "data-store/airflow_scrape_data.db")
+    lines = response.text.split('\n')
+    id = 0
+    nexradmap = []
+    for line in lines:
+        line = line.strip()
+        word_list = line.split(" ")
+        if (word_list[-1].upper() == 'NEXRAD'):
+            nexradmap.append(line)
+    nexradmap = [i for i in nexradmap if 'UNITED STATES' in i]
     
-    # Define database file name and path and connect to database
+    for station in nexradmap:
+        id += 1
+        station1 = station.split("  ")
+        station1 =  [i.strip() for i in station1 if i != ""]
+        station2 = station.split(" ")
+        station2 =  [i.strip() for i in station2 if i != ""]
+        nexradmap_data_dict['ID'].append(id)
+        nexradmap_data_dict['Station_Code'].append(station1[0].split(" ")[1])
+        for i in range(len(station1)):
+            if (re.match(r'\b[A-Z][A-Z]\b',station1[i].strip())):
+                nexradmap_data_dict['State'].append(station1[i][:2])
+                nexradmap_data_dict['County'].append(station1[i][2:])
+        for i in range(len(station2)):
+            if (re.match(r'^-?[0-9]\d(\.\d+)?$',station2[i])):
+                nexradmap_data_dict['latitude'].append(float(station2[i]))
+                nexradmap_data_dict['longitude'].append(float(station2[i+1]))
+                nexradmap_data_dict['elevation'].append(int(station2[i+2]))
+                break
+    
+    nexradmap_data = pd.DataFrame(nexradmap_data_dict)
+    write_logs(f"Returning metadata for NEXRAD Map Locations: {nexradmap_data}")
+
+    # Set up the database connection and create table if not exists
     database_file_name = 'airflow_scrape_data.db'
-    database_file_path = os.path.join(os.path.dirname(__file__),database_file_name)
-    conn = sqlite3.connect(database_file_path, isolation_level=None, detect_types=sqlite3.PARSE_COLNAMES)
-    
-    # Read data from the database tables GEOS18 and NEXRAD into pandas dataframes
-    goes_df = pd.read_sql_query("SELECT * FROM GEOS18", conn)
-    nexrad_df = pd.read_sql_query("SELECT * FROM NEXRAD", conn)
+    ddl_file_name = 'airflow_nexradmap.sql'
+    table_name = 'NexradMap'
 
-    # Upload the GEOS18 data to S3 bucket in CSV format
-    s3client.put_object(Body=goes_df.to_csv(index=False), Bucket=os.environ.get('USER_BUCKET_NAME'), Key='data-store/goes18_data.csv')
+    database_file_path = os.path.join(os.path.dirname(__file__), database_file_name)
+    ddl_file_path = os.path.join(os.path.dirname(__file__), ddl_file_name)
+    db = sqlite3.connect(database_file_path)
     
-    # Upload the NEXRAD data to S3 bucket in CSV format
-    s3client.put_object(Body=nexrad_df.to_csv(index=False), Bucket=os.environ.get('USER_BUCKET_NAME'), Key='data-store/nexrad_data.csv')
+    # If database file path found return the updated metadata into NexRad Table in the db
+    if Path(database_file_path).is_file():
+        write_logs(f"Database file found, saving NexradMap metadata into NexradMap Table")
+        nexradmap_data.to_sql(table_name, db, if_exists = 'replace', index=False)
+        cursor = db.cursor()
+    
+    # If database file path not found, create a db file and return the updated metadata into NexRad Table
+    else:
+        write_logs(f"Database file not found, initializing database {database_file_name} and updating data into NexradMap Table.")
+        with open(ddl_file_path, 'r') as sql_file:
+            sql_script = sql_file.read()        
+        nexradmap_data.to_sql(table_name, db, if_exists = 'replace', index=False)
+        cursor = db.cursor()
+        cursor.executescript(sql_script)
+        
+    # Commit the queries in DB file
+    db.commit()
+    
+    # Close DB file
+    db.close()
+    write_logs(f"Successfully Scraped NexradMap Metadata and stored to Database file.")
 
-    # Close the database connection and log the successful upload of database and data files to S3 bucket
-    conn.close()
-    write_logs(f"Successfully uploaded database and data files to S3 bucket.")
+def upload_db_s3():
+    file_path = './dags/airflow_scrape_data.db'
+    with open(file_path, "rb") as f:
+        s3client.upload_fileobj(f, 'damg-7245-projects/data-store', 'airflow_scrape_data.db')
 
 with dag:
 
@@ -246,6 +311,14 @@ with dag:
     dag=dag,
     )
 
+    # Creating PythonOperator to scrape NEXRAD metadata and store it in a SQLite database
+    scrape_nexradmap = PythonOperator(   
+    task_id='scrape_nexradmap',
+    python_callable = scrape_nexradmap_metadata,
+    provide_context=True,
+    dag=dag,
+    )
+
     # Creating PythonOperator to upload SQLite database to S3
     upload_db = PythonOperator(   
     task_id='upload_db_to_s3',
@@ -255,4 +328,4 @@ with dag:
     )
 
     # Defining the workflow by setting up the dependencies between tasks
-    scrape_geos18 >> scrape_nexrad >> upload_db
+    scrape_geos18 >> scrape_nexrad >> scrape_nexradmap >> upload_db

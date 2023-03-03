@@ -1,6 +1,6 @@
 import json
 import warnings
-from apimain import app
+from .apimain import app
 from fastapi.testclient import TestClient
 warnings.filterwarnings('ignore')
 

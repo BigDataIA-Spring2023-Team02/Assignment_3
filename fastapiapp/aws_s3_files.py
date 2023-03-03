@@ -24,7 +24,6 @@ router = APIRouter(
 @router.get('/goes18', status_code=status.HTTP_200_OK)
 async def list_files_in_goes18_bucket(year : str, day : str, hour : str, product : str = "ABI-L1b-RadC", token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -75,7 +74,6 @@ async def list_files_in_goes18_bucket(year : str, day : str, hour : str, product
 @router.get('/nexrad', status_code=status.HTTP_200_OK)
 async def list_files_in_nexrad_bucket(year : str, month : str, day : str, nexrad_station : str, token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -125,7 +123,6 @@ async def list_files_in_nexrad_bucket(year : str, month : str, day : str, nexrad
 @router.post('/goes18/copyfile', status_code=status.HTTP_200_OK)
 async def copy_goes_file_to_user_bucket(file_name : str, product : str, year : str, day : str, hour : str, token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -186,7 +183,6 @@ async def copy_goes_file_to_user_bucket(file_name : str, product : str, year : s
 @router.post('/nexrad/copyfile', status_code=status.HTTP_200_OK)
 def copy_nexrad_file_to_user_bucket(file_name : str, year : str, month : str, day : str, nexrad_station : str, token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     

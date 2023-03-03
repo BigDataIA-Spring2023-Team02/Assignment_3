@@ -1,5 +1,5 @@
-import json
 import os
+import json
 import boto3
 import requests
 import streamlit as st
@@ -10,16 +10,12 @@ from streamlit_extras.switch_page_button import switch_page
 
 BASE_URL = "http://localhost:8000"
 
-
 st.title("Reset Password Page !!!")
-st.header("NOAA Data Exploration Tool !!!")
 
 user = st.text_input("User Name")
 new_password = st.text_input("Password", type="password")
 confirm_password = st.text_input("Confirm Password", type="password")
-
 reset_button = st.button('Update Password !!!')
-
 
 if new_password == '' or confirm_password == '':
     st.warning("Please enter all fields")
@@ -46,8 +42,6 @@ else:
     else:
         st.error("Failed to reset password")
 
-
 if reset_button:
     with st.spinner("Loading..."):
         switch_page('Login_Page')
-

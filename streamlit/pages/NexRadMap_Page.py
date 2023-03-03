@@ -33,6 +33,58 @@ if st.session_state['logged_in'] == True:
             st.warning("Unable to fetch mapdata")
             st.stop()
         else:
+            api_limit_flag = False
+            user_plan_response = requests.get(f"{BASE_URL}/user/details?username={st.session_state['username']}", headers={'Authorization' : f"Bearer {st.session_state['access_token']}"})
+            if user_plan_response.status_code == 200:
+                user_plan = json.loads(user_plan_response.text)
+                try:
+                    api_calls = requests.get(f"{BASE_URL}/logs/latest?username={st.session_state['username']}", headers={'Authorization' : f"Bearer {st.session_state['access_token']}"})
+                except:
+                    st.error("Service unavailable, please try again later")
+                    st.stop()
+                if api_calls.status_code == 200:
+                    log_response = json.loads(api_calls.text)
+                    call_last_hour = len(log_response['timestamp'])
+                    
+                    if user_plan == ["Free"]:
+                        if (int(call_last_hour) >= 10):
+                            st.error("You have exhausted the 10 hourly API calls limit. Consider upgrading to the Gold plan!")
+                            st.write("Do you wish to upgrade?")
+                            if st.button("Yes"):
+                                check_limit = requests.post(f"{BASE_URL}/user/updateplan?username={st.session_state['username']}", headers={'Authorization' : f"Bearer {st.session_state['access_token']}"})
+                                if check_limit.status_code == 200:
+                                    st.success("Plan upgraded, please continue.")
+                                    with st.spinner("Loading..."): 
+                                        st.experimental_rerun()
+                            if st.button("No"):
+                                st.session_state['logged_in'] = False
+                                st.experimental_rerun()
+                        else:
+                            api_limit_flag = True
+
+                    elif user_plan == ["Gold"]:
+                        if (int(call_last_hour) >= 15):
+                            st.error("You have exhausted the 15 hourly API calls limit. Consider upgrading to the Platinum plan!")
+                            st.write("Do you wish to upgrade?")
+                            if st.button("Yes"):
+                                check_limit2 = requests.post(f"{BASE_URL}/user/updateplan?username={st.session_state['username']}", headers={'Authorization' : f"Bearer {st.session_state['access_token']}"})
+                                if check_limit2.status_code == 200:
+                                    st.success("Plan upgraded, please continue.")
+                                    with st.spinner("Loading..."): 
+                                        st.experimental_rerun()
+                            if st.button("No"):
+                                st.session_state['logged_in'] = False
+                                st.experimental_rerun()
+                        else:
+                            api_limit_flag = True
+            
+                    elif (user_plan == ['Platinum']):
+                        api_limit_flag = True
+            
+                    else:
+                        api_limit_flag = True
+        
+        if api_limit_flag:
             json_data = json.loads(response.text)
             map_dict = json_data
 

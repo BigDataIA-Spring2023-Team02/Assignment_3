@@ -161,6 +161,3 @@ def nexrad_map_coordinates(ctx: typer.Context):
             typer.echo(f"HTTP error occurred: {httperr}")
     except requests.exceptions.RequestException as reqerr:
         typer.echo(f"An error occurred: {reqerr}")
-
-if __name__ == "__main__":
-    typercli()

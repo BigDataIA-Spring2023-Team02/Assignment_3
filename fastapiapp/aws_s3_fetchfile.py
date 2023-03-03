@@ -26,7 +26,6 @@ router = APIRouter(
 @router.post('/goes18', status_code=status.HTTP_200_OK)
 async def generate_goes_url(file_input : str, token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     
@@ -85,7 +84,6 @@ async def generate_goes_url(file_input : str, token: str = Depends(oauth2_scheme
 @router.post('/nexrad', status_code=status.HTTP_200_OK)
 async def generate_nexrad_url(file_input : str, token: str = Depends(oauth2_scheme)):
     user_id = get_current_user(token)
-    
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
     

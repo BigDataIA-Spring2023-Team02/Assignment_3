@@ -27,9 +27,7 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
     
     # If password is incorrect, raise HTTP 404 error
     if not verify(user.password, request.password):
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incorrect Password")
-                
-    
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Incorrect Password")
     
     # Create JWT access token for authenticated user
     access_token = create_access_token(data={"sub": user.full_name})
@@ -43,8 +41,6 @@ def reset_password(request: schemas.PasswordReset, db: Session = Depends(user_da
     Reset the password for a given user.
     """
     # Check if the new password and confirm password fields match
-    print("New Pass", request.new_password)
-    print("New Pass",request.confirm_password)
     if request.new_password != request.confirm_password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password and confirm password do not match.")
     
@@ -56,17 +52,18 @@ def reset_password(request: schemas.PasswordReset, db: Session = Depends(user_da
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
     
     # Hash the new password
-    print("New Pass",request.new_password)
     hashed_password = jwt_api.bcrypt(request.new_password)
-    print("Hasshed Pass",hashed_password)
     
     # Update the user's password in the database
     user.password = hashed_password
-    print("DB Password", user.password)
     db.commit()
+    db.refresh(user)
+
+    # Returning the newly created user object
+    return user
+
+    # # Create a new access token for the user with the updated password
+    # access_token = jwt_api.create_access_token(data={"sub": user.full_name})
     
-    # Create a new access token for the user with the updated password
-    access_token = jwt_api.create_access_token(data={"sub": user.full_name})
-    
-    # Return the access token and bearer token type
-    return {"access_token": access_token, "token_type": "bearer"}
+    # # Return the access token and bearer token type
+    # return {"access_token": access_token, "token_type": "bearer"}

@@ -28,6 +28,7 @@ user_input = {
         }
 
 # Create DAG with the given parameters
+
 dag = DAG(
     dag_id="metadata_extract",
     schedule="0 5 * * *",   # https://crontab.guru/
@@ -55,7 +56,7 @@ clientLogs = boto3.client('logs',
 # Define a function to write logs to AWS CloudWatch
 def write_logs(message: str):
     clientLogs.put_log_events(
-        logGroupName = "Assignment03-logs",
+        logGroupName = "Assignment02-logs",
         logStreamName = "Airflow-Logs",
         logEvents = [
             {
@@ -245,7 +246,7 @@ with dag:
     )
 
     ge_data_context_noaa_geos18_checkpoint_name = GreatExpectationsOperator(
-        task_id="ge_data_context_root_dir_with_checkpoint_name_pass",
+        task_id="ge_data_context_noaa_geos18_checkpoint_name",
         data_context_root_dir=ge_root_dir,
         checkpoint_name="noaa_geos18_checkpoint_v1",
         fail_task_on_validation_failure=False
@@ -267,7 +268,7 @@ with dag:
     )
 
     ge_data_context_noaa_nexrad_checkpoint_name = GreatExpectationsOperator(
-        task_id="ge_data_context_root_dir_with_checkpoint_name_pass",
+        task_id="ge_data_context_noaa_nexrad_checkpoint_name",
         data_context_root_dir=ge_root_dir,
         checkpoint_name="noaa_nexrad_checkpoint_v1",
         fail_task_on_validation_failure=False
@@ -289,8 +290,6 @@ with dag:
     )
 
     # Defining the workflow by setting up the dependencies between tasks
-    scrape_geos18 >> extract_geos18
-    # >> ge_data_context_noaa_geos18_checkpoint_name
-    scrape_nexrad >> extract_nexrad
-    # >> ge_data_context_noaa_nexrad_checkpoint_name
+    scrape_geos18 >> extract_geos18 >> ge_data_context_noaa_geos18_checkpoint_name
+    scrape_nexrad >> extract_nexrad >> ge_data_context_noaa_nexrad_checkpoint_name
     scrape_nexradmap >> extract_nexrad_mapdata
