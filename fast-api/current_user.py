@@ -37,7 +37,7 @@ def update_password(username : str, new_password: schemas.UpdatePassword, db: Se
     db.refresh(user)
     return user
 
-@router.get('/user/user_details', status_code=status.HTTP_200_OK)
+@router.get('/user/user-details', status_code=status.HTTP_200_OK)
 async def user_details(username : str, current_user: schemas.User = Depends(get_current_user), userdb : Connection = Depends(get_user_data_file)):
     query = "SELECT user_type FROM all_users WHERE username==\'" + username +"\'"
     user_data = pd.read_sql_query(query, userdb)
