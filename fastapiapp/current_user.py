@@ -13,16 +13,20 @@ router = APIRouter(
 get_user_db = user_data.get_user_data
 
 # Creating a POST route to create a new user
-@router.post('/user/create', response_model= schemas.ShowUser)
+@router.post('/user/create', response_model=schemas.ShowUser)
 def create_user(request: schemas.User, database: Session = Depends(get_user_db)):
     """
     Create a new user and add it into user database to login to the system
     """
-    # Creating a new user object with hashed password
-    if user.username in schemas.User:
+    # Check if the username already exists in the database
+    user_exists = database.query(user_db_model.User_Table).filter_by(username=request.username).first()
+    if user_exists:
         raise HTTPException(status_code=400, detail="Username already registered")
-    user = user_db_model.User_Table(full_name = request.full_name, username = request.username, password = bcrypt(request.password), plan = request.plan, role = request.role)
-    
+
+    # Creating a new user object with hashed password
+    user = user_db_model.User_Table(full_name=request.full_name, username=request.username,
+                                    password=bcrypt(request.password), plan=request.plan, role=request.role)
+
     # Adding the new user to the database
     database.add(user)
     database.commit()
@@ -32,5 +36,4 @@ def create_user(request: schemas.User, database: Session = Depends(get_user_db))
 
     # Returning the newly created user object
     return user
-
     

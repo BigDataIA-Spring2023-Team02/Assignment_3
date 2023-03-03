@@ -8,3 +8,5 @@ class User_Table(Base):
     full_name = Column(String)
     username = Column(String)
     password = Column(String)
+    plan = Column(String)
+    role = Column(String)

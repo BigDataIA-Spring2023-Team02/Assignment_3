@@ -15,6 +15,7 @@ if 'logged_in' not in st.session_state:
     st.session_state['username'] = ''
     st.session_state['password'] = ''
     st.session_state['plan']=''
+    st.session_state['role']=''
 
 if st.session_state['logged_in'] == False:
     st.write("Create a new user account to get started !!!")
@@ -31,7 +32,7 @@ if st.session_state['logged_in'] == False:
     if register_submit:
         if len(password) < 6:
             st.warning("Password should be minimum 6 characters long")
-        elif full_name == '' or username == '' or password == '' or confirm_password == '' or plan == '':
+        elif full_name == '' or username == '' or password == '' or confirm_password == '' or plan == '' or role == '':
             st.warning("Please fill all fields.")
         elif password != confirm_password:
             with st.spinner("Wait ..."):
@@ -43,11 +44,13 @@ if st.session_state['logged_in'] == False:
                     st.session_state.username = username
                     st.session_state.password = password
                     st.session_state.plan = plan
+                    st.session_state.role = role
                     register_user = {
                         'full_name': st.session_state.full_name,
                         'username': st.session_state.username,
                         'password': st.session_state.password,
-                        'plan': st.session_state.plan
+                        'plan': st.session_state.plan,
+                        'role':st.session_state.role
                     }
                     response = requests.post(url=f'{BASE_URL}/user/create', json=register_user) 
                 except:
